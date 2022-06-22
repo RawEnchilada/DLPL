@@ -1,0 +1,21 @@
+
+
+variable
+  : type word ';'
+  ;
+
+type
+  : 'int'
+  | 'float'
+  | 'char'
+  | 'bool'
+  ;
+
+word
+  : word letter
+  | letter
+  ;
+
+letter
+  : '[a-zA-Z]'
+  ;
