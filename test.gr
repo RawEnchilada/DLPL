@@ -1,10 +1,9 @@
 
-
 variable
   : type word ';'
   ;
 
-type
+keyword type
   : 'int'
   | 'float'
   | 'char'
@@ -12,10 +11,5 @@ type
   ;
 
 word
-  : word letter
-  | letter
-  ;
-
-letter
-  : '[a-zA-Z]'
+  : '[a-zA-Z]+'
   ;

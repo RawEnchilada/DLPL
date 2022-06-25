@@ -21,10 +21,12 @@ class Lexer{
         int tokenLength = 1;
         Result? result;
         if(_peek() == "\0")return Token("\0","EOF");
+
         //find the next substring that has a space or newline after it
         String peek = _peek(num: tokenLength);
         while(peek[peek.length-1] != " " || peek[peek.length-1] != "\n"){
-            peek = peek.substring(0, peek.length-1);
+            tokenLength++;
+            peek = _peek(num: tokenLength);
         }
         tokenLength = peek.length-1;//remove the last space or newline
 
@@ -40,8 +42,14 @@ class Lexer{
                 break;
             }
         }
+
+
         if(result!.status == Rule.ambiguous){
-            throw Exception("Unable to parse token - Ambiguous token: $peek\n");
+            String msg = "Unable to parse token - Ambiguous token: $peek\n\tValid rules:\n";
+            for (var e in result.rules) {
+                msg += "\t${e.name}\n";
+            }
+            throw Exception(msg);
         }
         if(result.status == Rule.unknown){
             throw Exception("Unable to parse token - Unknown token: ${_peek(num: tokenLength)}\n");
@@ -49,7 +57,7 @@ class Lexer{
         if(tokenLength == _content.length-1){
             throw Exception("Unable to parse token - Unexpected end of file\n");
         }
-        return Token(_consume(num: tokenLength),result.rule!.name);
+        return Token(_consume(num: tokenLength),result.rules[0].name);
     }
 
 }
