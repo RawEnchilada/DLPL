@@ -95,20 +95,10 @@ class GrammarTree{
         int status = Rule.unknown;
         for(var node in rules){
             var got = node.pass(token,this);
-            switch(got){
-                case Rule.eof:
-                    status = Rule.eof;
-                    throw Exception("Unexpected end of file");
-                case Rule.unknown:
-                    break;
-                case Rule.ambiguous:
-                    matched = 2;
-                    break;
-                case Rule.found:
-                    status = Rule.found;
-                    rulelist.add(node);
-                    matched++;
-                    break;
+            if(got == token.length){
+                status = Rule.found;
+                rulelist.add(node);
+                matched++;
             }
             if(node.priority == 1 && status == Rule.found){
                 return Result(status, rulelist);
@@ -146,32 +136,45 @@ class Rule{
     if the condition is within '', it is a regular expression
     */
     int pass(String source,GrammarTree tree){
-        bool matched = false;
+        int matchedLengthToReturn = 0;
         for(var condition in conditions){
-            bool valid = true;
-            for(var part in condition.split(' ')){
+            int matchedLength = 0;
+            int matchedParts = 0;
+            var parts = condition.split(' ');
+            String sourceCopy = source;
+            for(var part in parts){
                 if(part.startsWith("@")){
+                    //TODO implement null or more references;
                     var referenced = tree.rules.firstWhere((rule) => rule.name == part.substring(1));
-                    if(referenced.pass(source,tree) != found){
-                        valid = false;
+                    int resultEnd = referenced.pass(sourceCopy,tree);
+                    if(resultEnd > 0){
+                        sourceCopy = sourceCopy.substring(resultEnd);
+                        int spaces = sourceCopy.length;
+                        sourceCopy = sourceCopy.trimLeft();
+                        spaces = spaces - sourceCopy.length;
+                        matchedLength += resultEnd+spaces;
+                        matchedParts++;
                     }
                 }
                 else if(part.startsWith("'")){
                     var regex = part.substring(1,part.length-1);
-
-                    if(!RegExp(regex).hasMatch(source)){
-                        valid = false;
+                    var result = RegExp(regex).firstMatch(sourceCopy);
+                    if(result != null){
+                        sourceCopy = sourceCopy.substring(result.end);
+                        int spaces = sourceCopy.length;
+                        sourceCopy = sourceCopy.trimLeft();
+                        spaces = spaces - sourceCopy.length;
+                        matchedLength += result.end+spaces;
+                        matchedParts++;
                     }
                 }
             }
-            if(valid)matched = true;
+            if(matchedParts == parts.length){
+                matchedLengthToReturn = matchedLength;
+                break;
+            }
         }
-        if(matched){
-            return found;
-        }
-        else{
-            return unknown;
-        }
+        return matchedLengthToReturn;
     }
 }
 

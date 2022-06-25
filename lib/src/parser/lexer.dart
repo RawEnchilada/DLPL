@@ -24,7 +24,7 @@ class Lexer{
 
         //find the next substring that has a space or newline after it
         String peek = _peek(num: tokenLength);
-        while(peek[peek.length-1] != " " || peek[peek.length-1] != "\n"){
+        while(tokenLength <= _content.length && peek[peek.length-1] != " " && peek[peek.length-1] != "\n"){
             tokenLength++;
             peek = _peek(num: tokenLength);
         }

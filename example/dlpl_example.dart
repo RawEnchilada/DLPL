@@ -5,6 +5,7 @@ void main() {
     File grammar = File("test.gr");
     var parseTree = GrammarTree(grammar.readAsStringSync());
     String source = "int something;";
+    print("input: $source");
     Result result = parseTree.classify(source);
     String res = "";
     switch(result.status){
@@ -24,5 +25,4 @@ void main() {
     }
     print(res);
     for (var element in result.rules) {print(element.name);}
-    //TODO solve only for fully matching rules
 }
