@@ -26,7 +26,7 @@ or use one of the provided grammars from the grammars folder.
 
 ## Usage
 
- - Run tests with `dart test`.
+ - Run tests with `test_and_coverage.sh`.
  - Run the given example with `dart run example/dlpl_example.dart`.
 
 #### Using the [Lexer](link to lexer): 
