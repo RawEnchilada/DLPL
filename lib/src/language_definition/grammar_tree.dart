@@ -129,7 +129,16 @@ class Rule{
     final List<String> conditions; //If ANY of these conditions apply, the rule will be accepted
 
 
-    Rule(this.name, this.conditions, {this.priority = 0});
+    Rule(this.name, this.conditions, {this.priority = 0}){
+        //sort conditions to regex first
+        conditions.sort((a,b){
+            if(a.startsWith("'")) {
+              return -1;
+            } else {
+              return 1;
+            }
+        });
+    }
 
     /*
     if the condition starts with @, it is a reference to a rule
@@ -143,20 +152,8 @@ class Rule{
             var parts = condition.split(' ');
             String sourceCopy = source;
             for(var part in parts){
-                if(part.startsWith("@")){
-                    //TODO implement null or more references;
-                    var referenced = tree.rules.firstWhere((rule) => rule.name == part.substring(1));
-                    int resultEnd = referenced.pass(sourceCopy,tree);
-                    if(resultEnd > 0){
-                        sourceCopy = sourceCopy.substring(resultEnd);
-                        int spaces = sourceCopy.length;
-                        sourceCopy = sourceCopy.trimLeft();
-                        spaces = spaces - sourceCopy.length;
-                        matchedLength += resultEnd+spaces;
-                        matchedParts++;
-                    }
-                }
-                else if(part.startsWith("'")){
+                bool partValid = false;
+				if(part.startsWith("'")){
                     var regex = part.substring(1,part.length-1);
                     var result = RegExp(regex).firstMatch(sourceCopy);
                     if(result != null){
@@ -166,7 +163,24 @@ class Rule{
                         spaces = spaces - sourceCopy.length;
                         matchedLength += result.end+spaces;
                         matchedParts++;
+                        partValid = true;
                     }
+                }
+                else if(part.startsWith("@")){
+                    var referenced = tree.rules.firstWhere((rule) => rule.name == part.substring(1));
+                    int resultEnd = referenced.pass(sourceCopy,tree);
+                    if(resultEnd > 0){
+                        sourceCopy = sourceCopy.substring(resultEnd);
+                        int spaces = sourceCopy.length;
+                        sourceCopy = sourceCopy.trimLeft();
+                        spaces = spaces - sourceCopy.length;
+                        matchedLength += resultEnd+spaces;
+                        matchedParts++;
+                        partValid = true;
+                    }
+                }
+                if(!partValid){
+                    break;
                 }
             }
             if(matchedParts == parts.length){

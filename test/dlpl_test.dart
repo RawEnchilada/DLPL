@@ -12,7 +12,13 @@ void main() {
         test('Parsing grammar', (){
             File grammar = File("test.gr");
             parseTree = GrammarTree(grammar.readAsStringSync());
-            expect(parseTree!.rules.length, 3);
+            int actual = 0;
+            for(var line in grammar.readAsLinesSync()){
+                if(line.contains(" ;")){
+                    actual++;
+                }
+            }
+            expect(parseTree!.rules.length, actual);
         });
 
 
@@ -42,12 +48,26 @@ void main() {
             Result result = parseTree!.classify(source);
             expect(result.status, Rule.unknown);
         });
+
+        test('Parsing a parameters declaration',(){
+            String source = "int a, int b";
+            Result result = parseTree!.classify(source);
+            expect(result.status, Rule.found);
+            expect(result.rules[0].name, "parameters_dec");
+        });
+
+        test('Parsing a function declaration',(){
+            String source = "int a(int b, int c)";
+            Result result = parseTree!.classify(source);
+            expect(result.status, Rule.found);
+            expect(result.rules[0].name, "function_dec");
+        });
     });
 
     group("Lexer test:", (){
         GrammarTree tree = GrammarTree(File("test.gr").readAsStringSync());
 
-        test("Tokenize small sample", (){
+        test("Tokenize variables", (){
             Lexer lexer = Lexer(tree,"int whole;\nchar letter;");
             Token token = lexer.nextToken();
             expect(token.type,"type");
@@ -56,6 +76,8 @@ void main() {
             expect(token.type,"word");
             expect(token.content,"whole");
         });
+
+        
 
         
     });

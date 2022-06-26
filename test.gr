@@ -13,3 +13,21 @@ keyword type
 word
   : '[a-zA-Z]+'
   ;
+
+
+
+function_dec
+  : type word '\(' parameters_dec '\)'
+  ;
+
+
+parameters_dec
+  : parameter_dec
+  | parameter_dec ',' parameters_dec
+  ;
+
+
+parameter_dec
+  : type word
+  ;
+  
