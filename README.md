@@ -17,6 +17,10 @@ This library provides a simple interface for processing text based on a given fo
  - Processing the code to a parse tree.
  - Compilig a parse tree back into code.
 
+## Install
+
+The package will be available on pub.dev and released in the packages section, whenever the main goals in the roadmap are achieved.
+
 ## Getting started
 
 Create your own grammar using test.gr as a reference.
