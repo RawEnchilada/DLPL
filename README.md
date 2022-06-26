@@ -22,14 +22,14 @@ This library provides a simple interface for processing text based on a given fo
 Create your own grammar using test.gr as a reference.
 or use one of the provided grammars from the grammars folder.
 
-*Antler's existing grammar(.g4) files, can be converted without too much difficulty to the DLPL grammar format.*
+*[Antlr's existing grammar(.g4) files](https://github.com/antlr/grammars-v4), can be converted without too much difficulty to the DLPL grammar format.*
 
 ## Usage
 
  - Run tests with `test_and_coverage.sh`.
  - Run the given example with `dart run example/dlpl_example.dart`.
 
-#### Using the [Lexer](link to lexer): 
+#### Using the ([Lexer](https://github.com/RawEnchilada/dlpl/blob/main/lib/src/parser/lexer.dart)): 
 ```dart
 GrammarTree tree = GrammarTree(File("grammars/test.gr").readAsLinesSync());
 Lexer lexer = new Lexer(tree, File("source.lang").readAsStringSync());
