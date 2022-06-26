@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:dlpl/src/language_definition/grammar_tree.dart';
 
 void main() {
-    File grammar = File("test.gr");
-    var parseTree = GrammarTree(grammar.readAsStringSync());
+    File grammar = File("grammars/test.gr");
+    var parseTree = GrammarTree(grammar.readAsLinesSync());
     String source = "int something;";
     print("input: $source");
     Result result = parseTree.classify(source);

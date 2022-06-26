@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'package:dlpl/src/language_definition/grammar_tree.dart';
 
+/// Lexer for a [GrammarTree].
 class Lexer{
 
     final GrammarTree _grammarTree;
     String _content = "";
 
     Lexer(this._grammarTree, this._content);
+    Lexer.newGrammar(List<String> grammarLines, String content) : _grammarTree = GrammarTree(grammarLines), _content = content;
+    Lexer.fromFile(this._grammarTree,String filePath) : _content = File(filePath).readAsStringSync();
+    Lexer.fromFileWithNewGrammar(List<String> grammarLines, String filePath) : _grammarTree = GrammarTree(grammarLines), _content = File(filePath).readAsStringSync();
 
     String _peek({int num = 0})  {
         return _content.substring(0, num);
@@ -17,6 +22,7 @@ class Lexer{
         return token;
     }
 
+    /// Returns the next token in the source code.
     Token nextToken() {
         int tokenLength = 1;
         Result? result;
@@ -34,7 +40,7 @@ class Lexer{
         while(tokenLength < _content.length-1){
             result = _grammarTree.classify(peek);
 
-            if(result.status == Rule.unknown || result.status == Rule.ambiguous){
+            if(result.status == Result.unknown || result.status == Result.ambiguous){
                 tokenLength--;
                 peek = _peek(num: tokenLength);
             }
@@ -44,14 +50,14 @@ class Lexer{
         }
 
 
-        if(result!.status == Rule.ambiguous){
+        if(result!.status == Result.ambiguous){
             String msg = "Unable to parse token - Ambiguous token: $peek\n\tValid rules:\n";
             for (var e in result.rules) {
                 msg += "\t${e.name}\n";
             }
             throw Exception(msg);
         }
-        if(result.status == Rule.unknown){
+        if(result.status == Result.unknown){
             throw Exception("Unable to parse token - Unknown token: ${_peek(num: tokenLength)}\n");
         }
         if(tokenLength == _content.length-1){
@@ -62,10 +68,10 @@ class Lexer{
 
 }
 
+/// A token in the source code.
 class Token{
     late final String type;
     final String content;
 
     Token(this.content, this.type);
-
 }

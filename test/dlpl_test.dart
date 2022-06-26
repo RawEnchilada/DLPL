@@ -6,66 +6,66 @@ import 'package:test/test.dart';
 
 void main() {
 
-    group('Parse tree test: ', (){
-        GrammarTree? parseTree;
+    group('Grammar tree test: ', (){
+        GrammarTree? grammarTree;
 
         test('Parsing grammar', (){
-            File grammar = File("test.gr");
-            parseTree = GrammarTree(grammar.readAsStringSync());
+            File grammar = File("grammars/test.gr");
+            grammarTree = GrammarTree(grammar.readAsLinesSync());
             int actual = 0;
             for(var line in grammar.readAsLinesSync()){
                 if(line.contains(" ;")){
                     actual++;
                 }
             }
-            expect(parseTree!.rules.length, actual);
+            expect(grammarTree!.rules.length, actual);
         });
 
 
         test('Parsing a word',(){
             String source = "word";
-            Result result = parseTree!.classify(source);
-            expect(result.status, Rule.found);
+            Result result = grammarTree!.classify(source);
+            expect(result.status, Result.found);
             expect(result.rules[0].name, "word");
         });
 
         test('Parsing a type',(){
             String source = "int";
-            Result result = parseTree!.classify(source);
-            expect(result.status, Rule.found);
+            Result result = grammarTree!.classify(source);
+            expect(result.status, Result.found);
             expect(result.rules[0].name, "type");
         });
 
         test('Parsing a variable',(){
             String source = "int word;";
-            Result result = parseTree!.classify(source);
-            expect(result.status, Rule.found);
+            Result result = grammarTree!.classify(source);
+            expect(result.status, Result.found);
             expect(result.rules[0].name, "variable");
         });
 
         test('Parsing an unknown token',(){
             String source = "ő";
-            Result result = parseTree!.classify(source);
-            expect(result.status, Rule.unknown);
+            Result result = grammarTree!.classify(source);
+            expect(result.status, Result.unknown);
         });
 
         test('Parsing a parameters declaration',(){
             String source = "int a, int b";
-            Result result = parseTree!.classify(source);
-            expect(result.status, Rule.found);
+            Result result = grammarTree!.classify(source);
+            expect(result.status, Result.found);
             expect(result.rules[0].name, "parameters_dec");
         });
 
         test('Parsing a function declaration',(){
             String source = "int a(int b, int c)";
-            Result result = parseTree!.classify(source);
-            expect(result.status, Rule.found);
+            Result result = grammarTree!.classify(source);
+            expect(result.status, Result.found);
             expect(result.rules[0].name, "function_dec");
         });
     });
 
     group("Lexer test:", (){
-        GrammarTree tree = GrammarTree(File("test.gr").readAsStringSync());
+        GrammarTree tree = GrammarTree(File("grammars/test.gr").readAsLinesSync());
 
         test("Tokenize variables", (){
             Lexer lexer = Lexer(tree,"int whole;\nchar letter;");

@@ -1,13 +1,13 @@
 
-
+///A set of rules parsed from a grammar file, that can be used to identify tokens matching the language.
 class GrammarTree{
-    List<Rule> rules = [];
+    List<_Rule> rules = [];
 
-    GrammarTree(String grammar){
-        var word = RegExp(r"([a-zA-z])\w+");
-        var conditional = RegExp(r"([^;|:]|\'.+\')");
+    /// Parse a grammar (.gr) file and create a GrammarTree object.
+    GrammarTree(List<String> lines){
+        final word = RegExp(r"([a-zA-z])\w+");
+        final conditional = RegExp(r"([^;|:]|\'.+\')");
 
-        var lines = grammar.split("\n");
         bool isComment = false;
         String nodeName = "";
         String condition = "";
@@ -63,7 +63,7 @@ class GrammarTree{
                     }
                     else if(part.contains(";") && nodeName != "" && (nodeContent.isNotEmpty || condition != "")){
                         nodeContent.add(condition);
-                        rules.add(Rule(nodeName, nodeContent, priority: priority));
+                        rules.add(_Rule(nodeName, nodeContent, priority: priority));
                         nodeName = "";
                         nodeContent = [];
                         addExpression = false;
@@ -88,27 +88,27 @@ class GrammarTree{
         }
     }
     
-
+    ///Return all rules in the tree that match [token] as a [Result].
     Result classify(String token){
         int matched = 0;
-        List<Rule> rulelist = [];
-        int status = Rule.unknown;
+        List<_Rule> rulelist = [];
+        int status = Result.unknown;
         for(var node in rules){
             var got = node.pass(token,this);
             if(got == token.length){
-                status = Rule.found;
+                status = Result.found;
                 rulelist.add(node);
                 matched++;
             }
-            if(node.priority == 1 && status == Rule.found){
+            if(node.priority == 1 && status == Result.found){
                 return Result(status, rulelist);
             }
         }
         if(matched == 0){
-            status = Rule.unknown;
+            status = Result.unknown;
         }
         if(matched > 1){
-            status = Rule.ambiguous;
+            status = Result.ambiguous;
         }
         return Result(status,rulelist);
     }
@@ -116,20 +116,15 @@ class GrammarTree{
 
 
 
-
-class Rule{
-    static const int eof = 0;
-    static const int unknown = 1;
-    static const int ambiguous = 2;
-    static const int found = 3;
-
-
+///A set of regular expressions to match a token.
+class _Rule{
     final String name; 
+    ///Used for matching keywords, do not set manually.
     final int priority;
     final List<String> conditions; //If ANY of these conditions apply, the rule will be accepted
 
 
-    Rule(this.name, this.conditions, {this.priority = 0}){
+    _Rule(this.name, this.conditions, {this.priority = 0}){
         //sort conditions to regex first
         conditions.sort((a,b){
             if(a.startsWith("'")) {
@@ -141,16 +136,20 @@ class Rule{
     }
 
     /*
-    if the condition starts with @, it is a reference to a rule
-    if the condition is within '', it is a regular expression
+        if the condition starts with @, it is a reference to a rule
+        if the condition is within '', it is a regular expression
     */
-    int pass(String source,GrammarTree tree){
+
+    ///Check if the [token] matches this rule, using references from [tree]
+    ///
+    ///Return the number of characters matched
+    int pass(String token,GrammarTree tree){
         int matchedLengthToReturn = 0;
         for(var condition in conditions){
             int matchedLength = 0;
             int matchedParts = 0;
             var parts = condition.split(' ');
-            String sourceCopy = source;
+            String sourceCopy = token;
             for(var part in parts){
                 bool partValid = false;
 				if(part.startsWith("'")){
@@ -192,10 +191,21 @@ class Rule{
     }
 }
 
-
+///A result of a classification, containing the status and the list of rules that matched.
 class Result{
+    static const int eof = 0;
+    static const int unknown = 1;
+    static const int ambiguous = 2;
+    static const int found = 3;
+
+    ///The status is one of the following:
+    /// - [eof] (0) - The token was at the end of the file.
+    /// - [unknown] (1) - The token was not recognized.
+    /// - [ambiguous] (2) - The token was recognized, but there were multiple rules that matched.
+    /// - [found] (3) - The token was recognized, and there was only one rule that matched.
     int status;
-    List<Rule> rules;
+    ///The list of rules that matched.
+    List<_Rule> rules;
 
     Result(this.status, this.rules);
 }

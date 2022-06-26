@@ -1,8 +1,17 @@
+/*
+  An example grammar file, used for testing and reference.
+
+  Conditions surrounded by apostrophes (') are interpreted as regular expressions.
+  Rest of the conditions are interpreted as references to other rules.
+*/
+
 
 variable
   : type word ';'
   ;
 
+
+//Mark reserved word rules as keyword, to avoid ambiguous tokens.
 keyword type
   : 'int'
   | 'float'
@@ -13,7 +22,6 @@ keyword type
 word
   : '[a-zA-Z]+'
   ;
-
 
 
 function_dec
